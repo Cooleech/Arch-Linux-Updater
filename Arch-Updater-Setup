@@ -1,0 +1,82 @@
+#!/bin/sh
+###########################
+# Arch Updater Setup v0.3 #
+# By Cooleech             #
+###########################
+. ~/.config/user-dirs.dirs # Uvezi postavke korisničkih mapa
+
+if [ -f ~/.local/Updater ]; then
+ rm ~/.local/Updater
+ rm ~/Desktop/Nadograditelj.desktop
+ zenity --info --title "Setup Arch Updater" --text "Updater je odinstaliran. Šmrc. ;(" --timeout 2
+ exit
+fi
+zenity --question --width 350 --title "UPOZORENJE" --text "Ovaj alat služi isključivo kao GUI zamjena za naredbu\n\n <i>pacman -Syu --noconfirm</i>\n\nte nije preporučljivo koristiti je ako sustav nadograđujete povremeno (zbog dodatka --noconfirm koji je bitan da se nadogradnja obavi automatski bez da vas pita za pristanak na bilo što).\n\nAko ste spremni prihvatiti <b>EVENTUALNI RIZIK</b> toga, kliknite na \"Nastavi instalaciju\", u suprotnom kliknite na \"Odustani od instalacije\"." --cancel-label "Odustani od instalacije" --ok-label "Nastavi instalaciju"
+if [ $? != 0 ]; then
+ exit
+fi
+echo -e "#!/bin/sh
+#####################
+# Arch Updater v0.3 #
+# By Cooleech       #
+#####################
+Pass=\`gksudo -u \$(whoami) -m \"Provjera nadogradnji\" -p\` # Ako želite, zakomentirajte ovu liniju i dodajte liniju Pass=\"vaš-password\" za nadogradnju bez passworda (nije preporučljivo!)
+(
+echo \"# Provjera nadogradnji u tijeku...\"
+echo \$Pass | sudo -S pacman -Syu | tee /tmp/updates
+) | zenity --width \"400\" --progress --title \"Nadogradnje sustava\" --text \"Provjera nadogradnji\" --percentage 0 --auto-close --pulsate
+Upd8s=\`cat /tmp/updates\`
+Upd8s=\"\${Upd8s//*(/}\"
+Upd8s=\"\${Upd8s//) /\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\n\\\\\\\n}\"
+case \"\$Upd8s\" in
+*ništa*|*nothing*)
+ zenity --info --title \"Nadogradnje sustava\" --text \"Nema novih nadogradnji!\" --timeout 2
+;;
+\"\")
+ zenity --error --title \"Nadogradnje sustava\" --text \"Nastala je neka greška pri provjeri. :(\"
+;;
+*)
+ zenity --question --width \"600\" --title \"Nadogradnje sustava\" --text \"Broj dostupnih nadogradnji: \$Upd8s\\\n\\\nNadograditi sada?\" --cancel-label \"Odustani\" --ok-label \"Nadogradi\"
+ if [ \$? = 0 ]; then
+  (
+  echo \"# Instaliravanje nadogradnji. Molim, pričekajte...\"
+  echo \$Pass | sudo -S pacman -Syu --noconfirm
+  if [ \$? = 0 ]; then
+   if [ -f /tmp/pacexitcode ]; then
+    ExitCode=\`cat /tmp/pacexitcode\`
+    if [ \$ExitCode != 0 ]; then
+     echo 0 > /tmp/pacexitcode
+    fi
+   else
+    echo 0 > /tmp/pacexitcode
+   fi
+  else
+   if [ -f /tmp/pacexitcode ]; then
+    ExitCode=\`cat /tmp/pacexitcode\`
+    if [ \$ExitCode != 1 ]; then
+     echo 1 > /tmp/pacexitcode
+    fi
+   else
+    echo 1 > /tmp/pacexitcode
+   fi
+  fi 
+  ) | zenity --width \"400\" --progress --title=\"Nadogradnje sustava\" --text \"\" --percentage=0 --auto-close --pulsate
+  ExitCode=\`cat /tmp/pacexitcode\`
+  if [ \$ExitCode = 0 ]; then
+   zenity --info --title \"Nadogradnje sustava\" --text \"Vaš sustav je nadograđen!\\\n\\\n\$(date '+%A, %d. %B %Y. @ %T')\"
+  else
+   zenity --error --title \"Nadogradnje sustava\" --text \"Nastala je neka greška prilikom nadogradnji. :(\nPacman Exit code: \$ExitCode\"
+  fi
+ fi
+;;
+esac
+exit" > ~/.local/Updater
+chmod 755 ~/.local/Updater
+echo -e "[Desktop Entry]
+Type=Application
+Exec=sh $HOME/.local/Updater
+Name=Nadograditelj
+Icon=/usr/share/icons/Adwaita/48x48/apps/system-software-update.png" > $XDG_DESKTOP_DIR/Nadograditelj.desktop
+chmod 755 $XDG_DESKTOP_DIR/Nadograditelj.desktop
+zenity --info --title "Setup Arch Updater" --text "Updater je uspješno instaliran. :)" --timeout 2
+exit

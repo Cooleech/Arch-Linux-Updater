@@ -1,13 +1,13 @@
 #!/bin/sh
 ###########################
-# Arch Updater Setup v0.3 #
+# Arch Updater Setup v0.4 #
 # By Cooleech             #
 ###########################
 . ~/.config/user-dirs.dirs # Uvezi postavke korisničkih mapa
 
 if [ -f ~/.local/Updater ]; then
  rm ~/.local/Updater
- rm ~/Desktop/Nadograditelj.desktop
+ rm $XDG_DESKTOP_DIR/Nadograditelj.desktop
  zenity --info --title "Setup Arch Updater" --text "Updater je odinstaliran. Šmrc. ;(" --timeout 2
  exit
 fi

@@ -17,7 +17,7 @@ if [ $? != 0 ]; then
 fi
 echo -e "#!/bin/sh
 #####################
-# Arch Updater v0.3 #
+# Arch Updater v0.4 #
 # By Cooleech       #
 #####################
 Pass=\`gksudo -u \$(whoami) -m \"Provjera nadogradnji\" -p\` # Ako želite, zakomentirajte ovu liniju i dodajte liniju Pass=\"vaš-password\" za nadogradnju bez passworda (nije preporučljivo!)
@@ -39,7 +39,7 @@ case \"\$Upd8s\" in
  zenity --question --width \"600\" --title \"Nadogradnje sustava\" --text \"Broj dostupnih nadogradnji: \$Upd8s\\\n\\\nNadograditi sada?\" --cancel-label \"Odustani\" --ok-label \"Nadogradi\"
  if [ \$? = 0 ]; then
   (
-  echo \"# Instaliravanje nadogradnji. Molim, pričekajte...\"
+  echo \"# Instaliranje nadogradnji. Molim, pričekajte...\"
   echo \$Pass | sudo -S pacman -Syu --noconfirm
   if [ \$? = 0 ]; then
    if [ -f /tmp/pacexitcode ]; then

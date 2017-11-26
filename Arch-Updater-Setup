@@ -17,26 +17,55 @@ if [ $? != 0 ]; then
 fi
 echo -e "#!/bin/sh
 #####################
-# Arch Updater v0.4 #
+# Arch Updater v0.5 #
 # By Cooleech       #
 #####################
+Title=\"Nadogradnje sustava\"
 Pass=\`gksudo -u \$(whoami) -m \"Provjera nadogradnji\" -p\` # Ako želite, zakomentirajte ovu liniju i dodajte liniju Pass=\"vaš-password\" za nadogradnju bez passworda (nije preporučljivo!)
 (
 echo \"# Provjera nadogradnji u tijeku...\"
 echo \$Pass | sudo -S pacman -Syu | tee /tmp/updates
-) | zenity --width \"400\" --progress --title \"Nadogradnje sustava\" --text \"Provjera nadogradnji\" --percentage 0 --auto-close --pulsate
+) | zenity --width \"400\" --progress --title \"\$Title\" --text \"Provjera nadogradnji\" --percentage 0 --auto-close --pulsate
 Upd8s=\`cat /tmp/updates\`
 Upd8s=\"\${Upd8s//*(/}\"
-Upd8s=\"\${Upd8s//) /\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\t\\\\\\\n\\\\\\\n}\"
+Upd8sNo=\"\${Upd8s//)*/}\"
+Upd8s=\"\${Upd8s//\$Upd8sNo) /\\\\\\\n}\"
 case \"\$Upd8s\" in
 *ništa*|*nothing*)
- zenity --info --title \"Nadogradnje sustava\" --text \"Nema novih nadogradnji!\" --timeout 2
+ zenity --info --width \"200\" --title \"\$Title\" --text \"Nema novih nadogradnji!\" --timeout 2
 ;;
 \"\")
- zenity --error --title \"Nadogradnje sustava\" --text \"Nastala je neka greška pri provjeri. :(\"
+ zenity --error --width \"200\" --title \"\$Title\" --text \"Nastala je neka greška pri provjeri. :(\"
 ;;
 *)
- zenity --question --width \"600\" --title \"Nadogradnje sustava\" --text \"Broj dostupnih nadogradnji: \$Upd8s\\\n\\\nNadograditi sada?\" --cancel-label \"Odustani\" --ok-label \"Nadogradi\"
+ case \"\$Upd8sNo\" in
+ *data*)
+  zenity --error --width \"250\" --title \"\$Title\" --text \"Provjerite vašu internetsku vezu i pokušajte opet.\\\n\\\nAko ovu poruku vidite već par puta zaredom, kontaktirajte me.\"
+  exit 1
+ ;;
+ ?)
+  MeWidth=\"300\"
+ ;;
+ 1?)
+  MeWidth=\"450\"
+ ;;
+ 2?)
+  MeWidth=\"600\"
+ ;;
+ 3?)
+  MeWidth=\"750\"
+ ;;
+ 4?)
+  MeWidth=\"900\"
+ ;;
+ 5?)
+  MeWidth=\"1050\"
+ ;;
+ *)
+  MeWidth=\"1200\"
+ ;;
+ esac
+ zenity --question --width \$MeWidth --title \"\$Title\" --text \"Broj dostupnih nadogradnji: \$Upd8sNo\\\n\$Upd8s\\\n\\\nNadograditi sada?\" --cancel-label \"Odustani\" --ok-label \"Nadogradi\"
  if [ \$? = 0 ]; then
   (
   echo \"# Instaliranje nadogradnji. Molim, pričekajte...\"
@@ -60,12 +89,12 @@ case \"\$Upd8s\" in
     echo 1 > /tmp/pacexitcode
    fi
   fi 
-  ) | zenity --width \"400\" --progress --title=\"Nadogradnje sustava\" --text \"\" --percentage=0 --auto-close --pulsate
+  ) | zenity --width \"400\" --progress --title \"\$Title\" --text \"\" --percentage 0 --auto-close --pulsate
   ExitCode=\`cat /tmp/pacexitcode\`
   if [ \$ExitCode = 0 ]; then
-   zenity --info --title \"Nadogradnje sustava\" --text \"Vaš sustav je nadograđen!\\\n\\\n\$(date '+%A, %d. %B %Y. @ %T')\"
+   zenity --info --width \"200\" --title \"\$Title\" --text \"Vaš sustav je nadograđen!\\\n\\\n\$(date '+%A, %d. %B %Y. @ %T')\"
   else
-   zenity --error --title \"Nadogradnje sustava\" --text \"Nastala je neka greška prilikom nadogradnji. :(\nPacman Exit code: \$ExitCode\"
+   zenity --error --width \"200\" --title \"\$Title\" --text \"Nastala je neka greška prilikom nadogradnji. :(\\\nPacman Exit Code: \$ExitCode\"
   fi
  fi
 ;;

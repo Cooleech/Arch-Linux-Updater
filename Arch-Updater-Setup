@@ -1,6 +1,6 @@
 #!/bin/sh
 ###########################
-# Arch Updater Setup v0.4 #
+# Arch Updater Setup v0.6 #
 # By Cooleech             #
 ###########################
 . ~/.config/user-dirs.dirs # Uvezi postavke korisničkih mapa
@@ -17,11 +17,11 @@ if [ $? != 0 ]; then
 fi
 echo -e "#!/bin/sh
 #####################
-# Arch Updater v0.5 #
+# Arch Updater v0.6 #
 # By Cooleech       #
 #####################
 Title=\"Nadogradnje sustava\"
-Pass=\`gksudo -u \$(whoami) -m \"Provjera nadogradnji\" -p\` # Ako želite, zakomentirajte ovu liniju i dodajte liniju Pass=\"vaš-password\" za nadogradnju bez passworda (nije preporučljivo!)
+Pass=\`zenity --password --title \"Lozinka korisnika \$(whoami)\"\` # Ako želite, zakomentirajte ovu liniju i dodajte liniju Pass=\"vaš-password\" za nadogradnju bez passworda (nije preporučljivo!)
 (
 echo \"# Provjera nadogradnji u tijeku...\"
 echo \$Pass | sudo -S pacman -Syu | tee /tmp/updates
